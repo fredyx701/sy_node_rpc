@@ -1,0 +1,10 @@
+{
+  "name": "sy_node_rpc",
+  "version": "0.0.0",
+  "private": false,
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "protobufjs": "^6.8.3"
+  }
+}

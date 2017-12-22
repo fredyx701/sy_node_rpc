@@ -1,4 +1,3 @@
 module.exports = {
-    Server: require('./lib/server'),
-    Client: require('./lib/client')
+    ClientSocket: require('./lib/client_socket')
 };

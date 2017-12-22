@@ -5,8 +5,7 @@
   "license": "MIT",
   "main": "index.js",
   "dependencies": {
-    "protobufjs": "^6.8.3",
     "buffer-crc32": "^0.2.13",
-    "grpc": "^1.8.0"
+    "protobufjs": "^6.8.3"
   }
 }

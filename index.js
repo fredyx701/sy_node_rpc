@@ -1,3 +1,4 @@
 module.exports = {
-    ClientSocket: require('./lib/client_socket')
+    JSONSocket: require('./json_socket/client_socket'),
+    ProtoBufSocket: require('./protobuf_socket/client_socket')
 };

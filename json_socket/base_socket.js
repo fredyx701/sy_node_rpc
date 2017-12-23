@@ -1,7 +1,6 @@
 const EventEmitter = require('events');
-const crc32 = require('buffer-crc32');
 
-const HEAD_LEN = 18;
+const HEAD_LEN = 14;
 
 class BaseSocket extends EventEmitter {
 
@@ -14,32 +13,30 @@ class BaseSocket extends EventEmitter {
 
     /**
      * 封包
-     * 1. flag      标签  2字节     0 rpc  1 rpc_res  2  event
-     * 2. askId     消息id  4字节
-     * 2. len       body长度 4字节
-     * 3. service   协议名  crc32加密  4字节
-     * 4. crc32     body加密  4字节
+     * 1. len       body长度  4字节
+     * 2. flag      标签      2字节   0 rpc  1 rpc_res  2  event
+     * 3. askId     消息id    4字节
+     * 4. service   协议名    4字节   crc32加密
      * 5. body      包体
      *
      * @param header 消息头
-     * @param body 消息体  buffer
+     * @param body 消息体  json string
      */
     encode(header, body) {
-        const body_crc = crc32.signed(body);
-        let buffer = Buffer.alloc(HEAD_LEN);
+        const body_len = Buffer.byteLength(body, 'utf8');
+        let buffer = Buffer.alloc(HEAD_LEN + body_len);
         let offset = 0;
 
+        buffer.writeInt32BE(body_len, offset);
+        offset += 4;
         buffer.writeInt16BE(header.flag, offset);
         offset += 2;
         buffer.writeInt32BE(header.askId, offset);
         offset += 4;
-        buffer.writeInt32BE(body.length, offset);
-        offset += 4;
         buffer.writeInt32BE(header.service_sign, offset);
         offset += 4;
-        buffer.writeInt32BE(body_crc, offset);
-        offset += 4;
-        return Buffer.concat([buffer, body], HEAD_LEN + body.length);
+        buffer.write(body, offset);
+        return buffer;
     };
 
 
@@ -55,26 +52,35 @@ class BaseSocket extends EventEmitter {
             if (this.buffer.length - this.offset < HEAD_LEN) {
                 break;
             }
-            const body_len = this.buffer.readInt32BE(this.offset + 6);
+            const body_len = this.buffer.readInt32BE(this.offset);
             if (body_len + HEAD_LEN <= this.buffer.slice(this.offset, this.offset + HEAD_LEN + body_len).length) {
                 const header = {};
+                header.len = body_len;
+                this.offset += 4;
                 header.flag = this.buffer.readInt16BE(this.offset);
                 this.offset += 2;
                 header.askId = this.buffer.readInt32BE(this.offset);
                 this.offset += 4;
-                header.len = this.buffer.readInt32BE(this.offset);
-                this.offset += 4;
                 header.service_sign = this.buffer.readInt32BE(this.offset);
                 this.offset += 4;
-                header.body_crc = this.buffer.readInt32BE(this.offset);
-                this.offset += 4;
-                const body = this.buffer.slice(this.offset, this.offset + body_len);
+                const body_buffer = this.buffer.slice(this.offset, this.offset + body_len);
                 this.offset += body_len;
-
-                msgs.push({
-                    header: header,
-                    body: body
-                });
+                try {
+                    let body = '';
+                    if (body_buffer.length > 0) {
+                        body = JSON.parse(body_buffer.toString());
+                    }
+                    msgs.push({
+                        header: header,
+                        body: body
+                    });
+                } catch (err) {
+                    err.message_body = {
+                        header: header,
+                        body: body_buffer.toString()
+                    };
+                    this.emit('error', err);
+                }
             } else {
                 break;
             }

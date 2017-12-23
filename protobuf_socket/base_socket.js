@@ -13,10 +13,10 @@ class BaseSocket extends EventEmitter {
 
     /**
      * 封包
-     * 1. len       body长度 4字节
-     * 2. flag      标签  2字节     0 rpc  1 rpc_res  2  event
-     * 3. askId     消息id  4字节
-     * 4. service   协议名  crc32加密  4字节
+     * 1. len       body长度  4字节
+     * 2. flag      标签      2字节   0 rpc  1 rpc_res  2  event
+     * 3. askId     消息id    4字节
+     * 4. service   协议名    4字节   crc32加密
      * 5. body      包体
      *
      * @param header  消息头

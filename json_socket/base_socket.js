@@ -20,9 +20,10 @@ class BaseSocket extends EventEmitter {
      * 5. body      包体
      *
      * @param header 消息头
-     * @param body 消息体  json string
+     * @param body   消息体  object
      */
     encode(header, body) {
+        body = JSON.stringify(body);
         const body_len = Buffer.byteLength(body, 'utf8');
         let buffer = Buffer.alloc(HEAD_LEN + body_len);
         let offset = 0;

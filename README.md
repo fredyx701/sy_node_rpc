@@ -1,8 +1,14 @@
 # sy_node_rpc
 一个node rpc框架
 
+[![npm package](https://nodei.co/npm/sy_node_rpc.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/sy_node_rpc/)
 
-### server
+### Getting Started
+```shell
+$ npm install sy_node_rpc --save
+```
+
+### Server
 ```javascript
 const net = require('net');
 const JSONSocket = require('sy_node_rpc').JSONSocket;
@@ -36,7 +42,7 @@ server.listen(3101, () => {
 ```
 
 
-### client
+### Client
 ```javascript
 const JSONSocket = require('sy_node_rpc').JSONSocket;
 

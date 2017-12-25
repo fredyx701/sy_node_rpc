@@ -97,7 +97,7 @@ class BaseSocket extends EventEmitter {
     /**
      * clear buffer
      */
-    _clean = function () {
+    _clean() {
         this.buffer = null;
         this.offset = 0;
     };

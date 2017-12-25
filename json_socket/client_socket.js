@@ -24,12 +24,14 @@ class ClientSocket extends BaseSocket {
         } else if (options.host && options.port) {
             this.client = new net.Socket();
             this.client.connect({
-                host: host,
-                port: port
+                host: options.host,
+                port: options.port
             });
         } else {
             throw Error('invalid options');
         }
+
+        this.remoteAddress = this.client.remoteAddress;
 
         this.client.on('connect', this._connectHandler.bind(this));
         this.client.on('close', this._closeHandler.bind(this));
@@ -118,10 +120,11 @@ class ClientSocket extends BaseSocket {
                 if (!this.acceptMap.has(header.service_sign)) {
                     continue;
                 }
-                const service_name = this.acceptMap[header.service_sign];
+                const service_name = this.acceptMap.get(header.service_sign);
                 if (!this.accepts.has(service_name)) {
                     continue;
                 }
+
                 const accept = this.accepts.get(service_name);
                 accept.callback(new Response(header, body, this));
             }
@@ -163,8 +166,12 @@ class ClientSocket extends BaseSocket {
 
 
     destroy() {
-        if (!this.closed) {
-            this.closed = true;
+        if (this.closed) {
+            return 0;
+        }
+        this.closed = true;
+        if (!this.client.destroyed) {
+            this.client.end();
             this.client.destroy();
         }
         this.accepts.clear();
@@ -181,12 +188,12 @@ class ClientSocket extends BaseSocket {
 
     _closeHandler() {
         this.emit('close');
+        this.destroy();
     };
 
 
     _errorHandler(error) {
         this.emit('error', error);
-        this.destroy();
     };
 }
 

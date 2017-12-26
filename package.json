@@ -2,7 +2,7 @@
   "name": "sy_node_rpc",
   "version": "0.0.2",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=7.6"
   },
   "private": false,
   "repository": {

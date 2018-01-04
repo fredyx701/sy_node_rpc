@@ -219,7 +219,6 @@ class ClientSocket extends BaseSocket {
 
     _closeHandler() {
         this.emit('close');
-        this.destroy();
     };
 
 

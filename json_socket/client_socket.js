@@ -18,6 +18,7 @@ class ClientSocket extends BaseSocket {
         this.acceptMap = new Map();
         this.rpcs = new Map();
         this.client = null;
+        this.options = options;
 
         if (options.socket) {
             this.client = options.socket;
@@ -37,6 +38,36 @@ class ClientSocket extends BaseSocket {
         this.client.on('close', this._closeHandler.bind(this));
         this.client.on('data', this._dataHandler.bind(this));
         this.client.on('error', this._errorHandler.bind(this));
+        this.client.on('timeout', this._timeoutHandler.bind(this));
+    }
+
+
+    reconnect() {
+        if (this.closed) {
+            throw Error('socket already destroyed');
+        }
+        if (!this.client.destroyed) {
+            throw Error('socket is connecting');
+        }
+        if (this.options.socket) {
+            throw Error('only client can be reconnected');
+        }
+        if (!this.options.host || !this.options.port) {
+            throw Error('invalid options');
+        }
+
+        this.client = new net.Socket();
+        this.client.connect({
+            host: this.options.host,
+            port: this.options.port
+        });
+        this.remoteAddress = this.client.remoteAddress;
+
+        this.client.on('connect', this._connectHandler.bind(this));
+        this.client.on('close', this._closeHandler.bind(this));
+        this.client.on('data', this._dataHandler.bind(this));
+        this.client.on('error', this._errorHandler.bind(this));
+        this.client.on('timeout', this._timeoutHandler.bind(this));
     }
 
 
@@ -195,6 +226,11 @@ class ClientSocket extends BaseSocket {
     _errorHandler(error) {
         this.emit('error', error);
     };
+
+
+    _timeoutHandler() {
+        this.emit('timeout');
+    }
 }
 
 

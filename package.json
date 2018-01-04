@@ -1,6 +1,6 @@
 {
   "name": "sy_node_rpc",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "node": ">=7.6"
   },

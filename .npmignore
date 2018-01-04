@@ -2,3 +2,5 @@
 /examples/protobuf_socket
 /protobuf_socket
 /.npmignore
+/.idea
+/.gitignore

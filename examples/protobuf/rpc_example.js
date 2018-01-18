@@ -77,24 +77,33 @@ function promise_example() {
 }
 
 
-
 function staic_example() {
-    const helloworld_proto = require('./helloworld_proto');
+    const helloworld_proto = require('./helloworld_static').helloworld;
 
     void async function () {
+        let greeter = null;
         try {
-            const greeter = helloworld_proto.helloworld.Greeter.create(rpcImpl);
-            let response = await greeter.sayHello({name: 'staic', id: [2,3,3]});
-            console.log('Static Greeting:', helloworld_proto.helloworld.HelloReply.toObject(response));
-            console.log(response);
-            console.log(helloworld_proto.helloworld.HelloReply.toObject(response));
+            greeter = helloworld_proto.Greeter.create(rpcImpl);
+            let response = await greeter.sayHello({name: 'staic', id: [2, 3, 3]});
+            console.log('Static Greeting:', response.toJSON());
+            console.log(response.toJSON().message);
+            console.log(helloworld_proto.HelloReply.toObject(response));
         } catch (err) {
             console.error(err);
         }
     }();
 
     function rpcImpl(method, requestData, callback) {
-        callback(null, requestData);
+        const message = helloworld_proto.Greeter.sayHelloRequestType().decode(requestData);
+        const data = {
+            message: 'hello ' + message.name,
+            id: message.id,
+            field: 6
+        };
+        const resType = helloworld_proto.Greeter.sayHelloResponseType();
+        const msg = resType.fromObject(data);
+        const buf = resType.encode(msg).finish();
+        callback(null, buf);
     }
 }
 
